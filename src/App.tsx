@@ -51,11 +51,24 @@ function App() {
     document.addEventListener("pointercancel", () => controller.abort(), { signal: controller.signal });
   }, [panelPos, dragged]);
 
-  // Set creatorName on new annotations based on active user
+  // Set creatorName and annotation color based on active user
   useEffect(() => {
     const instance = instanceRef.current;
-    if (!instance) return;
+    const NutrientViewer = nutrientRef.current;
+    if (!instance || !NutrientViewer) return;
+
     instance.setAnnotationCreatorName(activeUser.name);
+
+    const color = new NutrientViewer.Color(activeUser.color);
+
+    // Update default color for all annotation types
+    instance.setAnnotationPresets((presets) => {
+      const updated = { ...presets };
+      for (const key of Object.keys(updated)) {
+        updated[key] = { ...updated[key], color, strokeColor: color };
+      }
+      return updated;
+    });
   }, [activeUser]);
 
   useEffect(() => {
